@@ -13,6 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @RestController
 @RequestMapping(value =  "/orders")
+@CrossOrigin("*")
 public class Order1Controller {
     @Autowired
     private Order1Service order1Service;

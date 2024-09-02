@@ -18,6 +18,15 @@ public interface Order1Mapper {
         if (product == null) {
             return null;
         }
-        return new ProductResponseDTO(product.getName(), String.valueOf(product.getPrice()), product.getCategory().getCategoryQuality().toString(), product.getQuantity());
+        return new ProductResponseDTO(
+                product.getId(),
+                product.getName(),
+                product.getDescription(),
+                product.getPrice(),
+                product.getCategory().getCategoryQuality().toString(),
+                product.getQuantity(),
+                product.getImageUrl(),
+                product.getCurrency()
+        );
     }
 }

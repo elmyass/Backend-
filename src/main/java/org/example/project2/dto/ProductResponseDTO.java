@@ -9,9 +9,13 @@ import lombok.*;
 @NoArgsConstructor
 
 public class ProductResponseDTO {
+    private Long id;
     private String name;
-    private String price;
+    private String description;
+    private Double price;
     private String categoryQuality;
     private Integer quantity;
+    private String imageUrl;
+    private String currency;
 }
 

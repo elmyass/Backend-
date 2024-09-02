@@ -5,13 +5,17 @@ import org.example.project2.dto.ProductRequestDTO;
 import org.example.project2.dto.ProductResponseDTO;
 import org.example.project2.services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 @AllArgsConstructor
 @RestController
 @RequestMapping(value = "/products")
+@CrossOrigin("*") // this annotation is used to allow out frontend to access the endpoints of this controller , we can specify origins using origins attribute
+
 public class ProductController {
 
     @Autowired
@@ -27,9 +31,19 @@ public class ProductController {
         return productService.findById(id);
     }
 
-    @PostMapping
-    public ProductResponseDTO addProduct(@RequestBody ProductRequestDTO productRequestDTO) {
-        return productService.save(productRequestDTO);
+
+    @RequestMapping (value = "/upload",method = {RequestMethod.POST,RequestMethod.OPTIONS})
+    public ProductResponseDTO addProduct(
+            @RequestParam("id") Long id,
+            @RequestParam("name") String name,
+            @RequestParam("price") Double price,
+            @RequestParam("description") String description,
+            @RequestParam("categoryQuality") String categoryQuality,
+            @RequestParam("file") MultipartFile file
+    ) {
+        ProductRequestDTO productRequestDTO = new ProductRequestDTO(id, name, description, price, categoryQuality, null);
+
+        return productService.save(productRequestDTO, file);
     }
 
     @DeleteMapping("/{id}")

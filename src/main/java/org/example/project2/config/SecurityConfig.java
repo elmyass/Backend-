@@ -15,13 +15,9 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         //http.authorizeRequests().requestMatchers("/products").permitAll();
-        //http.authorizeRequests().anyRequest().authenticated();
-        http.authorizeHttpRequests(auth -> {
-            auth.requestMatchers(HttpMethod.GET,"/products")
-                    .permitAll()
-                    .anyRequest()
-                    .permitAll();
-        });
+        //http.authorizeRequests().requestMatchers("/products/{id}").permitAll();
+       // http.authorizeRequests().anyRequest().authenticated();
+        http.authorizeRequests().anyRequest().permitAll();
         http.oauth2ResourceServer().jwt().jwtAuthenticationConverter(new CustomAuthenticationConverter());
         return http.build();
     }

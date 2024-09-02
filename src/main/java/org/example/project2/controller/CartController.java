@@ -17,6 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @RestController
 @RequestMapping(value = "/carts")
+@CrossOrigin("*")
 public class CartController {
     private final CartService cartService;
 

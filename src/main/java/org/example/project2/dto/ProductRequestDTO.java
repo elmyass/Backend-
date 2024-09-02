@@ -13,8 +13,10 @@ import org.example.project2.enums.CategoryQuality;
 public class ProductRequestDTO {
     private Long id;
     private String name;
-    private Double price;
     private String description;
-    private CategoryQuality categoryQuality;
-
+    private Double price;
+    private String categoryQuality;
+   // private Integer quantity;
+    private String imageUrl;
+    //private String currency;
 }
