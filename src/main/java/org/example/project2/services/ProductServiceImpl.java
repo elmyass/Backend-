@@ -8,10 +8,13 @@ import org.example.project2.enums.CategoryQuality;
 import org.example.project2.mappers.ProductMapper;
 import org.example.project2.repositories.CategoryRepository;
 import org.example.project2.repositories.ProductRepository;
+import org.example.project2.storage.FileStorage;
+import org.example.project2.storage.SystemFileStorage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -28,12 +31,36 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     private ProductMapper productMapper;
 
-    @Override
+    @Autowired
+    private SystemFileStorage systemFileStorage;
+
     public List<ProductResponseDTO> findAll() {
-        return productRepository.findAll()
-                .stream()
-                .map(productMapper::toProductResponseDTO)
+        List<Product> products = productRepository.findAll();
+        return products.stream()
+                .map(this::mapToProductResponseDTO)
                 .collect(Collectors.toList());
+    }
+
+    private ProductResponseDTO mapToProductResponseDTO(Product product) {
+        ProductResponseDTO dto = new ProductResponseDTO();
+        dto.setId(product.getId());
+        dto.setName(product.getName());
+        dto.setDescription(product.getDescription());
+        dto.setPrice(product.getPrice());
+        dto.setCategoryQuality(product.getCategoryQuality().toString());
+        dto.setImageUrl(product.getImageUrl());
+
+        // Load the image data
+        try {
+            if (product.getImageUrl() != null) {
+                dto.setImageData(systemFileStorage.getFile(product.getImageUrl()));
+            }
+        } catch (IOException e) {
+            // Handle the exception (e.g., log it)
+            dto.setImageData(null);
+        }
+
+        return dto;
     }
 
     @Override
@@ -51,9 +78,11 @@ public class ProductServiceImpl implements ProductService {
         product.setCategoryQuality(categoryQuality);
 
         Category category = categoryRepository.findByCategoryQuality(categoryQuality);
+        if (category == null) {
+            throw new NoSuchElementException("No category found with quality: " + categoryQuality);
+        }
         product.setCategory(category);
 
-        // Handle file upload here and set the URL in the product entity
         String imageUrl = handleFileUpload(file);
         product.setImageUrl(imageUrl);
 
@@ -62,19 +91,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void deleteById(Long id) {
-        if (!productRepository.existsById(id)) {
-            throw new NoSuchElementException("Product with ID " + id + " not found");
-        }
-        try {
-            productRepository.deleteById(id);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to delete product with ID " + id, e);
-        }
-    }
-
-    @Override
-    public ProductResponseDTO update(Long id, ProductRequestDTO productRequestDTO) {
+    public ProductResponseDTO update(Long id, ProductRequestDTO productRequestDTO, MultipartFile file) {
         Product product = productRepository.findById(id)
                 .orElseThrow(NoSuchElementException::new);
 
@@ -86,22 +103,40 @@ public class ProductServiceImpl implements ProductService {
         product.setCategoryQuality(categoryQuality);
 
         Category category = categoryRepository.findByCategoryQuality(categoryQuality);
+        if (category == null) {
+            throw new NoSuchElementException("No category found with quality: " + categoryQuality);
+        }
         product.setCategory(category);
 
-        product.setImageUrl(productRequestDTO.getImageUrl());
+        if (file != null && !file.isEmpty()) {
+            String imageUrl = handleFileUpload(file);
+            product.setImageUrl(imageUrl);
+        } else {
+            product.setImageUrl(productRequestDTO.getImageUrl());
+        }
 
         Product updatedProduct = productRepository.save(product);
         return productMapper.toProductResponseDTO(updatedProduct);
     }
 
-    private String handleFileUpload(MultipartFile file) {
-        // Implement the logic to store the file and return the file URL
-        // You might want to save the file to a server or cloud storage and then return the accessible URL.
-        return "generated-image-url"; // Placeholder for the actual URL.
+    @Override
+    public void deleteById(Long id) {
+        if (!productRepository.existsById(id)) {
+            throw new NoSuchElementException("Product with ID " + id + " not found");
+        }
+        productRepository.deleteById(id);
     }
 
     @Override
     public List<Product> searchProducts(String query) {
         return productRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(query, query);
+    }
+
+    private String handleFileUpload(MultipartFile file) {
+        try {
+            return systemFileStorage.saveFile(file);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to store file", e);
+        }
     }
 }

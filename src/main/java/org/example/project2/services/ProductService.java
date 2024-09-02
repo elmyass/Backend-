@@ -12,6 +12,6 @@ public interface ProductService {
     ProductResponseDTO findById(Long id);
     ProductResponseDTO save(ProductRequestDTO productRequestDTO, MultipartFile file);
     void deleteById(Long id);
-    ProductResponseDTO update(Long id, ProductRequestDTO productRequestDTO);
+    ProductResponseDTO update(Long id, ProductRequestDTO productRequestDTO, MultipartFile file);
     List<Product> searchProducts(String query);
 }

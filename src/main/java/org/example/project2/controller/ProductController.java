@@ -33,16 +33,15 @@ public class ProductController {
     }
 
 
-    @RequestMapping (value = "/upload",method = {RequestMethod.POST,RequestMethod.OPTIONS})
+    @RequestMapping(value = "/upload", method = {RequestMethod.POST, RequestMethod.OPTIONS})
     public ProductResponseDTO addProduct(
-            @RequestParam("id") Long id,
             @RequestParam("name") String name,
             @RequestParam("price") Double price,
             @RequestParam("description") String description,
             @RequestParam("categoryQuality") String categoryQuality,
-            @RequestParam("file") MultipartFile file
-    ) {
-        ProductRequestDTO productRequestDTO = new ProductRequestDTO(id, name, description, price, categoryQuality, null);
+            @RequestParam("file") MultipartFile file) {
+
+        ProductRequestDTO productRequestDTO = new ProductRequestDTO(null, name, description, price, categoryQuality, null);
 
         return productService.save(productRequestDTO, file);
     }
@@ -53,8 +52,12 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    public ProductResponseDTO updateProduct(@PathVariable Long id, @RequestBody ProductRequestDTO productRequestDTO) {
-        return productService.update(id, productRequestDTO);
+    public ProductResponseDTO updateProduct(
+            @PathVariable Long id,
+            @ModelAttribute ProductRequestDTO productRequestDTO,
+            @RequestParam(value = "file", required = false) MultipartFile file) {
+
+        return productService.update(id, productRequestDTO, file);
     }
     @GetMapping("/search")
     public List<Product> searchProducts(@RequestParam("q") String query) {
