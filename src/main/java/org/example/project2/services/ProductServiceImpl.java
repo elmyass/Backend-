@@ -99,4 +99,9 @@ public class ProductServiceImpl implements ProductService {
         // You might want to save the file to a server or cloud storage and then return the accessible URL.
         return "generated-image-url"; // Placeholder for the actual URL.
     }
+
+    @Override
+    public List<Product> searchProducts(String query) {
+        return productRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(query, query);
+    }
 }

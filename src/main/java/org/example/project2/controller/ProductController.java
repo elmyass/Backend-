@@ -3,6 +3,7 @@ package org.example.project2.controller;
 import lombok.AllArgsConstructor;
 import org.example.project2.dto.ProductRequestDTO;
 import org.example.project2.dto.ProductResponseDTO;
+import org.example.project2.entities.Product;
 import org.example.project2.services.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -54,5 +55,9 @@ public class ProductController {
     @PutMapping("/{id}")
     public ProductResponseDTO updateProduct(@PathVariable Long id, @RequestBody ProductRequestDTO productRequestDTO) {
         return productService.update(id, productRequestDTO);
+    }
+    @GetMapping("/search")
+    public List<Product> searchProducts(@RequestParam("q") String query) {
+        return productService.searchProducts(query);
     }
 }
